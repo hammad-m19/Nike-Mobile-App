@@ -109,6 +109,12 @@ export default function LoginScreen() {
                 }}
               />
               {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+              <Pressable
+                onPress={() => navigate('ForgotPassword')}
+                style={styles.forgotPasswordContainer}
+              >
+                <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+              </Pressable>
             </View>
 
             {/* Policy disclaimer */}
@@ -254,6 +260,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#111111',
+    textDecorationLine: 'underline',
+  },
+  forgotPasswordContainer: {
+    alignSelf: 'flex-end',
+    marginTop: 8,
+  },
+  forgotPasswordText: {
+    fontSize: 13,
+    color: '#8D8D8D',
+    fontWeight: '600',
     textDecorationLine: 'underline',
   },
 });

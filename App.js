@@ -12,6 +12,7 @@ import FavoritesScreen from './src/screens/FavoritesScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import ProductDetailsScreen from './src/screens/ProductDetailsScreen';
 import CollectionScreen from './src/screens/CollectionScreen';
+import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 
 // Import Reusable Components
 import Header from './src/components/Header';
@@ -27,6 +28,10 @@ function AppContent() {
 
   if (currentScreen === 'SignUp') {
     return <SignUpScreen />;
+  }
+
+  if (currentScreen === 'ForgotPassword') {
+    return <ForgotPasswordScreen />;
   }
 
   // 2. Product Details Screen (full height overlay)
