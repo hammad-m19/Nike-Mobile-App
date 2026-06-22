@@ -41,7 +41,13 @@ export default function HomeScreen() {
         <Text style={styles.campaignTitle}>{item.title}</Text>
         <Pressable
           style={styles.campaignButton}
-          onPress={() => navigate('Main', 'Search')}
+          onPress={() => {
+            const isJordan = item.id === 'c1';
+            navigate('Collection', null, null, {
+              id: isJordan ? 'jordan' : 'running',
+              title: isJordan ? 'Air Jordan Retro' : 'Nike Running Gear'
+            });
+          }}
         >
           <Text style={styles.campaignButtonText}>{item.buttonText}</Text>
         </Pressable>
@@ -128,7 +134,9 @@ export default function HomeScreen() {
           </View>
           <View style={styles.featuredGrid}>
             {featuredProducts.map((item) => (
-              <ProductCard key={item.id} product={item} />
+              <View key={item.id} style={styles.gridCardWrapper}>
+                <ProductCard product={item} />
+              </View>
             ))}
           </View>
         </View>
@@ -268,5 +276,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
+  },
+  gridCardWrapper: {
+    width: '47%',
   },
 });

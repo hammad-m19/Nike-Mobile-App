@@ -90,7 +90,9 @@ export default function SearchScreen() {
             </Text>
             <View style={styles.gridContainer}>
               {filteredProducts.map((item) => (
-                <ProductCard key={item.id} product={item} />
+                <View key={item.id} style={styles.gridCardWrapper}>
+                  <ProductCard product={item} />
+                </View>
               ))}
             </View>
           </ScrollView>
@@ -231,5 +233,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#111111',
+  },
+  gridCardWrapper: {
+    width: '47%',
   },
 });

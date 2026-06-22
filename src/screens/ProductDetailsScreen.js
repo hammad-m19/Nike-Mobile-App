@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 
 export default function ProductDetailsScreen() {
-  const { selectedProductId, products, favorites, toggleFavorite, goBack } = useApp();
+  const { selectedProductId, products, favorites, toggleFavorite, goBack, addToCart } = useApp();
 
   // Find the selected product
   const product = products.find((p) => p.id === selectedProductId);
@@ -47,9 +47,11 @@ export default function ProductDetailsScreen() {
       return;
     }
     
+    addToCart(product, selectedSize, selectedColor);
+    
     Alert.alert(
       'Added to Bag',
-      `Successfully added ${product.name} (Size: ${selectedSize}, Color: ${selectedColor.name}) to your shopping bag!`,
+      `Successfully added ${product.name} (Size: ${selectedSize}, Color: ${selectedColor ? selectedColor.name : ''}) to your shopping bag!`,
       [{ text: 'Great' }]
     );
   };

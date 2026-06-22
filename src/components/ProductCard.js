@@ -48,7 +48,7 @@ export default function ProductCard({ product }) {
 
 const styles = StyleSheet.create({
   cardContainer: {
-    width: '47%', // standard grid sizing
+    width: '100%', // standard responsive width controlled by parent
     marginBottom: 20,
   },
   imageContainer: {

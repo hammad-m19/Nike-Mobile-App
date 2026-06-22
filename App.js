@@ -11,6 +11,7 @@ import SearchScreen from './src/screens/SearchScreen';
 import FavoritesScreen from './src/screens/FavoritesScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import ProductDetailsScreen from './src/screens/ProductDetailsScreen';
+import CollectionScreen from './src/screens/CollectionScreen';
 
 // Import Reusable Components
 import Header from './src/components/Header';
@@ -31,6 +32,11 @@ function AppContent() {
   // 2. Product Details Screen (full height overlay)
   if (currentScreen === 'ProductDetails') {
     return <ProductDetailsScreen />;
+  }
+
+  // 3. Collection Screen (full height overlay)
+  if (currentScreen === 'Collection') {
+    return <CollectionScreen />;
   }
 
   // 3. Main Application with Tab Bar

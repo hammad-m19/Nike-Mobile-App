@@ -11,26 +11,42 @@ export const AppProvider = ({ children }) => {
   // Wishlist State (Array of product IDs)
   const [favorites, setFavorites] = useState([]);
 
+  // Shopping Cart State (Array of { product, size, color, quantity })
+  const [cart, setCart] = useState([]);
+
   // Custom Navigation State
-  const [currentScreen, setCurrentScreen] = useState('Login'); // 'Login', 'SignUp', 'Main', 'ProductDetails'
+  const [currentScreen, setCurrentScreen] = useState('Login'); // 'Login', 'SignUp', 'Main', 'ProductDetails', 'Collection'
   const [activeTab, setActiveTab] = useState('Home'); // 'Home', 'Search', 'Favorites', 'Profile'
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const [selectedCollectionId, setSelectedCollectionId] = useState(null); // 'jordan', 'running', etc.
+  const [selectedCollectionTitle, setSelectedCollectionTitle] = useState('');
   const [navigationStack, setNavigationStack] = useState([]);
 
-  // Dynamic products list (in case we need to update/manage)
+  // Dynamic products list
   const [products] = useState(PRODUCTS);
 
   // Navigation Logic
-  const navigate = (screen, tab = null, productId = null) => {
+  const navigate = (screen, tab = null, productId = null, collectionData = null) => {
     // Record current state in stack for back navigation
     setNavigationStack((prevStack) => [
       ...prevStack,
-      { screen: currentScreen, tab: activeTab, productId: selectedProductId }
+      {
+        screen: currentScreen,
+        tab: activeTab,
+        productId: selectedProductId,
+        collectionId: selectedCollectionId,
+        collectionTitle: selectedCollectionTitle
+      }
     ]);
 
     setCurrentScreen(screen);
     if (tab) setActiveTab(tab);
     if (productId !== undefined) setSelectedProductId(productId);
+    
+    if (collectionData) {
+      setSelectedCollectionId(collectionData.id);
+      setSelectedCollectionTitle(collectionData.title);
+    }
   };
 
   const goBack = () => {
@@ -39,6 +55,7 @@ export const AppProvider = ({ children }) => {
       setCurrentScreen('Main');
       setActiveTab('Home');
       setSelectedProductId(null);
+      setSelectedCollectionId(null);
       return;
     }
 
@@ -49,6 +66,8 @@ export const AppProvider = ({ children }) => {
       setCurrentScreen(previousState.screen);
       setActiveTab(previousState.tab);
       setSelectedProductId(previousState.productId);
+      setSelectedCollectionId(previousState.collectionId);
+      setSelectedCollectionTitle(previousState.collectionTitle);
       
       return newStack;
     });
@@ -56,7 +75,6 @@ export const AppProvider = ({ children }) => {
 
   // Auth Functions
   const login = (email, password) => {
-    // Simple verification
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return false;
@@ -72,21 +90,22 @@ export const AppProvider = ({ children }) => {
       return false;
     }
 
-    // Success - Set default Nike Member profile
     const userName = email.split('@')[0];
     const capitalizedName = userName.charAt(0).toUpperCase() + userName.slice(1);
     
     setUser({
       name: capitalizedName,
       email: email,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop' // default mockup avatar
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop'
     });
     
-    // Clear navigation history and route to Main Home
     setNavigationStack([]);
+    setCart([]);
+    setFavorites([]);
     setCurrentScreen('Main');
     setActiveTab('Home');
     setSelectedProductId(null);
+    setSelectedCollectionId(null);
     return true;
   };
 
@@ -111,28 +130,31 @@ export const AppProvider = ({ children }) => {
       return false;
     }
 
-    // Success - Set User
     setUser({
       name: name,
       email: email,
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop'
     });
 
-    // Clear navigation history and route to Main Home
     setNavigationStack([]);
+    setCart([]);
+    setFavorites([]);
     setCurrentScreen('Main');
     setActiveTab('Home');
     setSelectedProductId(null);
+    setSelectedCollectionId(null);
     return true;
   };
 
   const logout = () => {
     setUser(null);
     setFavorites([]);
+    setCart([]);
     setNavigationStack([]);
     setCurrentScreen('Login');
     setActiveTab('Home');
     setSelectedProductId(null);
+    setSelectedCollectionId(null);
   };
 
   const updateProfile = (name, email) => {
@@ -164,14 +186,46 @@ export const AppProvider = ({ children }) => {
     });
   };
 
+  // Shopping Cart Logic
+  const addToCart = (product, size, color) => {
+    setCart((prevCart) => {
+      // Check if item already exists in cart with same size and color
+      const existingItemIndex = prevCart.findIndex(
+        (item) =>
+          item.product.id === product.id &&
+          item.size === size &&
+          item.color.name === color.name
+      );
+
+      if (existingItemIndex > -1) {
+        const newCart = [...prevCart];
+        newCart[existingItemIndex].quantity += 1;
+        return newCart;
+      } else {
+        return [...prevCart, { product, size, color, quantity: 1 }];
+      }
+    });
+  };
+
+  const removeFromCart = (index) => {
+    setCart((prevCart) => prevCart.filter((_, i) => i !== index));
+  };
+
+  const clearCart = () => {
+    setCart([]);
+  };
+
   return (
     <AppContext.Provider
       value={{
         user,
         favorites,
+        cart,
         currentScreen,
         activeTab,
         selectedProductId,
+        selectedCollectionId,
+        selectedCollectionTitle,
         products,
         navigate,
         goBack,
@@ -179,7 +233,10 @@ export const AppProvider = ({ children }) => {
         register,
         logout,
         updateProfile,
-        toggleFavorite
+        toggleFavorite,
+        addToCart,
+        removeFromCart,
+        clearCart
       }}
     >
       {children}

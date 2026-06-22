@@ -23,7 +23,9 @@ export default function FavoritesScreen() {
           </Text>
           <View style={styles.gridContainer}>
             {favoriteItems.map((item) => (
-              <ProductCard key={item.id} product={item} />
+              <View key={item.id} style={styles.gridCardWrapper}>
+                <ProductCard product={item} />
+              </View>
             ))}
           </View>
         </ScrollView>
@@ -115,5 +117,8 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '700',
+  },
+  gridCardWrapper: {
+    width: '47%',
   },
 });
