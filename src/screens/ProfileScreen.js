@@ -14,6 +14,7 @@ import {
   SafeAreaView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useApp } from '../context/AppContext';
 
 export default function ProfileScreen() {
@@ -27,6 +28,7 @@ export default function ProfileScreen() {
   const [editName, setEditName] = useState(user ? user.name : '');
   const [editEmail, setEditEmail] = useState(user ? user.email : '');
   const [editAddress, setEditAddress] = useState(user ? user.address : '');
+  const [editAvatar, setEditAvatar] = useState(user ? user.avatar : null);
 
   // Password edit form states
   const [showPasswordFields, setShowPasswordFields] = useState(false);
@@ -38,6 +40,60 @@ export default function ProfileScreen() {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailOffers, setEmailOffers] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+
+  // Gallery Picker Function
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permission Denied',
+        'We need access to your library to choose a profile photo. Please enable it in device settings.'
+      );
+      return;
+    }
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        setEditAvatar(result.assets[0].uri);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to pick image from gallery.');
+    }
+  };
+
+  // Camera Capture Function
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permission Denied',
+        'We need access to your camera to snap a photo. Please enable it in device settings.'
+      );
+      return;
+    }
+
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        setEditAvatar(result.assets[0].uri);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to take photo with camera.');
+    }
+  };
 
   const handleEditSave = () => {
     if (!editName.trim() || !editEmail.trim()) {
@@ -66,7 +122,7 @@ export default function ProfileScreen() {
       passwordToUpdate = newPassword;
     }
     
-    const success = updateProfile(editName.trim(), editEmail.trim(), editAddress.trim(), passwordToUpdate);
+    const success = updateProfile(editName.trim(), editEmail.trim(), editAddress.trim(), editAvatar, passwordToUpdate);
     if (success) {
       setActiveModal(null);
       Alert.alert('Success', 'Profile updated successfully!');
@@ -78,6 +134,7 @@ export default function ProfileScreen() {
       setEditName(user.name);
       setEditEmail(user.email);
       setEditAddress(user.address || '');
+      setEditAvatar(user.avatar || null);
     }
     setCurrentPasswordInput('');
     setNewPassword('');
@@ -123,10 +180,13 @@ export default function ProfileScreen() {
         
         {/* User Card */}
         <View style={styles.profileHeader}>
-          <Image
-            source={{ uri: user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop' }}
-            style={styles.avatar}
-          />
+          {user?.avatar ? (
+            <Image source={{ uri: user.avatar }} style={styles.avatar} />
+          ) : (
+            <View style={[styles.avatar, styles.avatarPlaceholder]}>
+              <Ionicons name="person" size={40} color="#8D8D8D" />
+            </View>
+          )}
           <Text style={styles.userName}>{user ? user.name : 'Nike Member'}</Text>
           <Text style={styles.userEmail}>{user ? user.email : 'member@nike.com'}</Text>
           <Text style={styles.memberSince}>Nike Member since 2026</Text>
@@ -182,6 +242,39 @@ export default function ProfileScreen() {
 
             <ScrollView showsVerticalScrollIndicator={false} style={styles.modalScrollForm}>
               <View style={styles.modalForm}>
+                
+                {/* Profile Pic Editor / Preview */}
+                <View style={styles.avatarEditContainer}>
+                  {editAvatar ? (
+                    <Image source={{ uri: editAvatar }} style={styles.editAvatarPreview} />
+                  ) : (
+                    <View style={styles.editAvatarPreviewPlaceholder}>
+                      <Ionicons name="person" size={32} color="#8D8D8D" />
+                    </View>
+                  )}
+                  <Text style={styles.photoInstructions}>Update your profile image for your Nike Pass and account view.</Text>
+                </View>
+
+                {/* Upload & Camera Buttons Row */}
+                <View style={styles.photoActionsWrapper}>
+                  <Pressable style={styles.photoActionBtn} onPress={takePhoto}>
+                    <Ionicons name="camera-outline" size={20} color="#111111" />
+                    <Text style={styles.photoActionText}>Take Photo</Text>
+                  </Pressable>
+                  
+                  <Pressable style={styles.photoActionBtn} onPress={pickImage}>
+                    <Ionicons name="image-outline" size={20} color="#111111" />
+                    <Text style={styles.photoActionText}>From Gallery</Text>
+                  </Pressable>
+
+                  {editAvatar && (
+                    <Pressable style={[styles.photoActionBtn, styles.photoActionDeleteBtn]} onPress={() => setEditAvatar(null)}>
+                      <Ionicons name="trash-outline" size={20} color="#E01E35" />
+                      <Text style={styles.photoActionDeleteText}>Remove</Text>
+                    </Pressable>
+                  )}
+                </View>
+
                 {/* Full Name */}
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Full Name</Text>
@@ -432,10 +525,13 @@ export default function ProfileScreen() {
               </View>
 
               <View style={styles.passTicketBody}>
-                <Image
-                  source={{ uri: user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop' }}
-                  style={styles.passAvatar}
-                />
+                {user?.avatar ? (
+                  <Image source={{ uri: user.avatar }} style={styles.passAvatar} />
+                ) : (
+                  <View style={[styles.passAvatar, styles.passAvatarPlaceholder]}>
+                    <Ionicons name="person" size={28} color="#8D8D8D" />
+                  </View>
+                )}
                 <View style={styles.passMemberDetails}>
                   <Text style={styles.passName} numberOfLines={1}>{user ? user.name : 'Nike Member'}</Text>
                   <Text style={styles.passTier}>ALL-STAR TIER</Text>
@@ -577,6 +673,13 @@ const styles = StyleSheet.create({
     borderRadius: 45,
     marginBottom: 16,
     borderWidth: 2,
+    borderColor: '#E5E5E5',
+  },
+  avatarPlaceholder: {
+    backgroundColor: '#F0F0F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
     borderColor: '#E5E5E5',
   },
   userName: {
@@ -748,6 +851,70 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
+  },
+  // Avatar Editor Styles
+  avatarEditContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  editAvatarPreview: {
+    width: 66,
+    height: 66,
+    borderRadius: 33,
+    borderWidth: 1.5,
+    borderColor: '#E5E5E5',
+  },
+  editAvatarPreviewPlaceholder: {
+    width: 66,
+    height: 66,
+    borderRadius: 33,
+    backgroundColor: '#F6F6F6',
+    borderWidth: 1.5,
+    borderColor: '#E5E5E5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  photoInstructions: {
+    fontSize: 12,
+    color: '#8D8D8D',
+    flex: 1,
+    marginLeft: 14,
+    lineHeight: 16,
+    fontWeight: '500',
+  },
+  photoActionsWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+    gap: 8,
+  },
+  photoActionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F6F6F6',
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  photoActionDeleteBtn: {
+    backgroundColor: '#FFF5F5',
+    borderColor: '#FFD2D2',
+  },
+  photoActionText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#111111',
+    marginLeft: 6,
+  },
+  photoActionDeleteText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#E01E35',
+    marginLeft: 6,
   },
   // Password Collapsible Styles
   passwordToggleHeader: {
@@ -1004,6 +1171,14 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     borderWidth: 1.5,
     borderColor: '#FFFFFF',
+  },
+  passAvatarPlaceholder: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   passMemberDetails: {
     marginLeft: 16,

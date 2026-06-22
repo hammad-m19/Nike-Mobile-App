@@ -167,7 +167,7 @@ export const AppProvider = ({ children }) => {
     setSelectedCollectionId(null);
   };
 
-  const updateProfile = (name, email, address, newPassword = null) => {
+  const updateProfile = (name, email, address, avatar = undefined, newPassword = null) => {
     if (!name || !email) {
       Alert.alert('Error', 'Name and email cannot be empty');
       return false;
@@ -182,6 +182,7 @@ export const AppProvider = ({ children }) => {
       name,
       email,
       address,
+      avatar: avatar !== undefined ? avatar : prev.avatar,
       ...(newPassword ? { password: newPassword } : {})
     }));
     return true;
