@@ -26,6 +26,13 @@ export default function ProfileScreen() {
   // Edit Profile form states
   const [editName, setEditName] = useState(user ? user.name : '');
   const [editEmail, setEditEmail] = useState(user ? user.email : '');
+  const [editAddress, setEditAddress] = useState(user ? user.address : '');
+
+  // Password edit form states
+  const [showPasswordFields, setShowPasswordFields] = useState(false);
+  const [currentPasswordInput, setCurrentPasswordInput] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
   // Account settings switch states
   const [pushNotifications, setPushNotifications] = useState(true);
@@ -38,7 +45,28 @@ export default function ProfileScreen() {
       return;
     }
     
-    const success = updateProfile(editName.trim(), editEmail.trim());
+    let passwordToUpdate = null;
+    if (showPasswordFields) {
+      if (!currentPasswordInput || !newPassword || !confirmNewPassword) {
+        Alert.alert('Error', 'Please fill in all password fields');
+        return;
+      }
+      if (currentPasswordInput !== user.password) {
+        Alert.alert('Error', 'Current password is incorrect');
+        return;
+      }
+      if (newPassword.length < 6) {
+        Alert.alert('Error', 'New password must be at least 6 characters');
+        return;
+      }
+      if (newPassword !== confirmNewPassword) {
+        Alert.alert('Error', 'New passwords do not match');
+        return;
+      }
+      passwordToUpdate = newPassword;
+    }
+    
+    const success = updateProfile(editName.trim(), editEmail.trim(), editAddress.trim(), passwordToUpdate);
     if (success) {
       setActiveModal(null);
       Alert.alert('Success', 'Profile updated successfully!');
@@ -49,7 +77,12 @@ export default function ProfileScreen() {
     if (user) {
       setEditName(user.name);
       setEditEmail(user.email);
+      setEditAddress(user.address || '');
     }
+    setCurrentPasswordInput('');
+    setNewPassword('');
+    setConfirmNewPassword('');
+    setShowPasswordFields(false);
     setActiveModal('edit');
   };
 
@@ -65,7 +98,6 @@ export default function ProfileScreen() {
     { icon: 'settings-outline', label: 'Account Settings', detail: 'Privacy, password & address', type: 'settings' }
   ];
 
-  // Draw custom barcode lines for Nike Pass card
   const renderBarcode = () => {
     const bars = [
       1, 3, 1, 2, 4, 1, 2, 1, 3, 2, 1, 1, 4, 2, 1, 3, 1, 2, 1, 4, 1, 2, 3, 1, 2, 1, 3, 1, 4, 1, 2, 1
@@ -140,7 +172,7 @@ export default function ProfileScreen() {
         onRequestClose={() => setActiveModal(null)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, styles.editModalContent]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Edit Profile</Text>
               <Pressable onPress={() => setActiveModal(null)} style={styles.closeModalButton}>
@@ -148,34 +180,112 @@ export default function ProfileScreen() {
               </Pressable>
             </View>
 
-            <View style={styles.modalForm}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Full Name</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={editName}
-                  onChangeText={setEditName}
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                />
-              </View>
+            <ScrollView showsVerticalScrollIndicator={false} style={styles.modalScrollForm}>
+              <View style={styles.modalForm}>
+                {/* Full Name */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Full Name</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={editName}
+                    onChangeText={setEditName}
+                    autoCapitalize="words"
+                    autoCorrect={false}
+                  />
+                </View>
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Email Address</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={editEmail}
-                  onChangeText={setEditEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-              </View>
+                {/* Email */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Email Address</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={editEmail}
+                    onChangeText={setEditEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                </View>
 
-              <Pressable style={styles.saveButton} onPress={handleEditSave}>
-                <Text style={styles.saveButtonText}>Save Changes</Text>
-              </Pressable>
-            </View>
+                {/* Shipping Address */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Shipping Address</Text>
+                  <TextInput
+                    style={[styles.modalInput, styles.addressInput]}
+                    value={editAddress}
+                    onChangeText={setEditAddress}
+                    multiline
+                    numberOfLines={2}
+                    placeholder="Street Address, City, State, ZIP"
+                    placeholderTextColor="#8D8D8D"
+                    autoCapitalize="words"
+                  />
+                </View>
+
+                {/* Password Expandable checkbox */}
+                <Pressable
+                  style={styles.passwordToggleHeader}
+                  onPress={() => setShowPasswordFields(!showPasswordFields)}
+                >
+                  <Ionicons
+                    name={showPasswordFields ? 'checkbox' : 'square-outline'}
+                    size={22}
+                    color="#111111"
+                    style={styles.passwordCheckbox}
+                  />
+                  <Text style={styles.passwordToggleText}>Change Password</Text>
+                </Pressable>
+
+                {showPasswordFields && (
+                  <View style={styles.passwordFieldsContainer}>
+                    {/* Current Password */}
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabel}>Current Password</Text>
+                      <TextInput
+                        style={styles.modalInput}
+                        value={currentPasswordInput}
+                        onChangeText={setCurrentPasswordInput}
+                        secureTextEntry
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                      />
+                    </View>
+
+                    {/* New Password */}
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabel}>New Password</Text>
+                      <TextInput
+                        style={styles.modalInput}
+                        value={newPassword}
+                        onChangeText={setNewPassword}
+                        placeholder="Minimum 6 characters"
+                        placeholderTextColor="#A0A0A0"
+                        secureTextEntry
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                      />
+                    </View>
+
+                    {/* Confirm New Password */}
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabel}>Confirm New Password</Text>
+                      <TextInput
+                        style={styles.modalInput}
+                        value={confirmNewPassword}
+                        onChangeText={setConfirmNewPassword}
+                        secureTextEntry
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                      />
+                    </View>
+                  </View>
+                )}
+
+                <Pressable style={styles.saveButton} onPress={handleEditSave}>
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                </Pressable>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -204,7 +314,6 @@ export default function ProfileScreen() {
                   </View>
                   <Text style={styles.orderDate}>Placed on: {order.date}</Text>
 
-                  {/* Order Items */}
                   <View style={styles.orderItemsList}>
                     {order.items.map((item, index) => (
                       <View key={index} style={styles.orderItemRow}>
@@ -313,7 +422,6 @@ export default function ProfileScreen() {
               Scan this pass at checkout in any Nike Store to verify your membership perks, log store purchases, and unlock rewards.
             </Text>
 
-            {/* Nike Pass Ticket */}
             <View style={styles.passTicket}>
               <View style={styles.passTicketTop}>
                 <View style={styles.passTicketBrand}>
@@ -335,7 +443,6 @@ export default function ProfileScreen() {
                 </View>
               </View>
 
-              {/* Dotted separator */}
               <View style={styles.ticketSeparator}>
                 <View style={styles.ticketDotLeft} />
                 <View style={styles.ticketDashLine} />
@@ -371,7 +478,6 @@ export default function ProfileScreen() {
           </View>
 
           <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
-            {/* Account Settings Forms */}
             <Text style={styles.settingsSectionTitle}>Preferences</Text>
 
             <View style={styles.settingRow}>
@@ -439,7 +545,6 @@ export default function ProfileScreen() {
               <Ionicons name="chevron-forward" size={16} color="#8D8D8D" />
             </Pressable>
 
-            {/* Bottom Actions */}
             <Pressable style={styles.settingsSaveBtn} onPress={handleSaveSettings}>
               <Text style={styles.settingsSaveBtnText}>Save Preferences</Text>
             </Pressable>
@@ -578,6 +683,12 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     paddingBottom: 40,
   },
+  editModalContent: {
+    maxHeight: '88%',
+  },
+  modalScrollForm: {
+    flexGrow: 1,
+  },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -599,6 +710,7 @@ const styles = StyleSheet.create({
   modalForm: {
     paddingHorizontal: 24,
     paddingTop: 20,
+    paddingBottom: 30,
   },
   inputLabel: {
     fontSize: 11,
@@ -620,18 +732,44 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     backgroundColor: '#FFFFFF',
   },
+  addressInput: {
+    height: 64,
+    textAlignVertical: 'top',
+  },
   saveButton: {
     backgroundColor: '#111111',
     paddingVertical: 16,
     borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
+    marginTop: 15,
   },
   saveButtonText: {
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
+  },
+  // Password Collapsible Styles
+  passwordToggleHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 14,
+    paddingVertical: 6,
+  },
+  passwordCheckbox: {
+    marginRight: 10,
+  },
+  passwordToggleText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#111111',
+  },
+  passwordFieldsContainer: {
+    borderLeftWidth: 2,
+    borderLeftColor: '#111111',
+    paddingLeft: 16,
+    marginLeft: 10,
+    marginBottom: 10,
   },
   // My Orders Modal Styles
   orderCard: {
@@ -759,7 +897,7 @@ const styles = StyleSheet.create({
     borderColor: '#E5E5E5',
     borderRadius: 12,
     marginBottom: 16,
-    backgroundColor: '#FFFBF9', // very light orange tint for alerts
+    backgroundColor: '#FFFBF9',
   },
   inboxCardRead: {
     backgroundColor: '#FFFFFF',

@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 
 export default function Header({ title, showBack = false }) {
-  const { goBack, cart, removeFromCart, clearCart, placeOrder } = useApp();
+  const { goBack, cart, removeFromCart, clearCart, placeOrder, user } = useApp();
   const [isCartVisible, setIsCartVisible] = useState(false);
   const [isNotificationsVisible, setIsNotificationsVisible] = useState(false);
 
@@ -161,6 +161,17 @@ export default function Header({ title, showBack = false }) {
                 <View style={[styles.summaryRow, styles.totalRow]}>
                   <Text style={styles.totalLabel}>Total</Text>
                   <Text style={styles.totalValue}>${cartSubtotal}</Text>
+                </View>
+
+                {/* Shipping Destination */}
+                <View style={styles.shippingSection}>
+                  <View style={styles.shippingHeader}>
+                    <Ionicons name="location-outline" size={16} color="#FF5A00" />
+                    <Text style={styles.shippingTitle}>DELIVERING TO</Text>
+                  </View>
+                  <Text style={styles.shippingAddressText}>
+                    {user && user.address ? user.address : '123 Nike Way, Beaverton, OR 97005'}
+                  </Text>
                 </View>
 
                 {/* Checkout CTA */}
@@ -533,5 +544,29 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#8D8D8D',
     fontWeight: '600',
+  },
+  shippingSection: {
+    backgroundColor: '#F6F6F6',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+  },
+  shippingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  shippingTitle: {
+    fontSize: 10,
+    fontWeight: '850',
+    color: '#111111',
+    letterSpacing: 0.5,
+    marginLeft: 6,
+  },
+  shippingAddressText: {
+    fontSize: 12,
+    color: '#444444',
+    fontWeight: '600',
+    lineHeight: 16,
   },
 });

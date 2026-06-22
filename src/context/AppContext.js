@@ -6,7 +6,7 @@ const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   // Authentication State
-  const [user, setUser] = useState(null); // { name, email, avatar } when logged in
+  const [user, setUser] = useState(null); // { name, email, avatar, address, password } when logged in
 
   // Wishlist State (Array of product IDs)
   const [favorites, setFavorites] = useState([]);
@@ -99,7 +99,9 @@ export const AppProvider = ({ children }) => {
     setUser({
       name: capitalizedName,
       email: email,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop'
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
+      address: '123 Nike Way, Beaverton, OR 97005', // Default Nike HQ address
+      password: password
     });
     
     setNavigationStack([]);
@@ -137,7 +139,9 @@ export const AppProvider = ({ children }) => {
     setUser({
       name: name,
       email: email,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop'
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
+      address: '123 Nike Way, Beaverton, OR 97005',
+      password: password
     });
 
     setNavigationStack([]);
@@ -163,7 +167,7 @@ export const AppProvider = ({ children }) => {
     setSelectedCollectionId(null);
   };
 
-  const updateProfile = (name, email) => {
+  const updateProfile = (name, email, address, newPassword = null) => {
     if (!name || !email) {
       Alert.alert('Error', 'Name and email cannot be empty');
       return false;
@@ -176,7 +180,9 @@ export const AppProvider = ({ children }) => {
     setUser((prev) => ({
       ...prev,
       name,
-      email
+      email,
+      address,
+      ...(newPassword ? { password: newPassword } : {})
     }));
     return true;
   };
