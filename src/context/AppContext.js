@@ -188,6 +188,17 @@ export const AppProvider = ({ children }) => {
     return true;
   };
 
+  const updateAddress = (address) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        address
+      };
+    });
+    return true;
+  };
+
   // Favorites (Wishlist) Logic
   const toggleFavorite = (productId) => {
     setFavorites((prev) => {
@@ -262,6 +273,7 @@ export const AppProvider = ({ children }) => {
         register,
         logout,
         updateProfile,
+        updateAddress,
         toggleFavorite,
         addToCart,
         removeFromCart,

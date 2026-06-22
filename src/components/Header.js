@@ -9,15 +9,29 @@ import {
   Image,
   Alert,
   SafeAreaView,
-  Platform
+  Platform,
+  TextInput
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 
 export default function Header({ title, showBack = false }) {
-  const { goBack, cart, removeFromCart, clearCart, placeOrder, user } = useApp();
+  const { goBack, cart, removeFromCart, clearCart, placeOrder, user, updateAddress } = useApp();
   const [isCartVisible, setIsCartVisible] = useState(false);
   const [isNotificationsVisible, setIsNotificationsVisible] = useState(false);
+
+  // Inline address editing states
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [addressInput, setAddressInput] = useState('');
+
+  const handleSaveAddress = () => {
+    if (!addressInput.trim()) {
+      Alert.alert('Error', 'Address cannot be empty.');
+      return;
+    }
+    updateAddress(addressInput.trim());
+    setIsEditingAddress(false);
+  };
 
   // Notifications Mock Data
   const [notifications, setNotifications] = useState([
@@ -165,13 +179,44 @@ export default function Header({ title, showBack = false }) {
 
                 {/* Shipping Destination */}
                 <View style={styles.shippingSection}>
-                  <View style={styles.shippingHeader}>
-                    <Ionicons name="location-outline" size={16} color="#FF5A00" />
-                    <Text style={styles.shippingTitle}>DELIVERING TO</Text>
+                  <View style={styles.shippingHeaderRow}>
+                    <View style={styles.shippingHeaderLeft}>
+                      <Ionicons name="location-outline" size={16} color="#FF5A00" />
+                      <Text style={styles.shippingTitle}>DELIVERING TO</Text>
+                    </View>
+                    {isEditingAddress ? (
+                      <View style={styles.addressEditActionRow}>
+                        <Pressable onPress={handleSaveAddress} style={styles.addressActionBtn}>
+                          <Text style={styles.addressActionSaveText}>Save</Text>
+                        </Pressable>
+                        <Pressable onPress={() => setIsEditingAddress(false)} style={[styles.addressActionBtn, { marginLeft: 12 }]}>
+                          <Text style={styles.addressActionCancelText}>Cancel</Text>
+                        </Pressable>
+                      </View>
+                    ) : (
+                      <Pressable onPress={() => {
+                        setAddressInput(user && user.address ? user.address : '123 Nike Way, Beaverton, OR 97005');
+                        setIsEditingAddress(true);
+                      }}>
+                        <Text style={styles.changeAddressLinkText}>Edit</Text>
+                      </Pressable>
+                    )}
                   </View>
-                  <Text style={styles.shippingAddressText}>
-                    {user && user.address ? user.address : '123 Nike Way, Beaverton, OR 97005'}
-                  </Text>
+                  
+                  {isEditingAddress ? (
+                    <TextInput
+                      style={styles.inlineAddressInput}
+                      value={addressInput}
+                      onChangeText={setAddressInput}
+                      multiline
+                      autoFocus
+                      placeholder="Street Address, City, State, ZIP"
+                    />
+                  ) : (
+                    <Text style={styles.shippingAddressText}>
+                      {user && user.address ? user.address : '123 Nike Way, Beaverton, OR 97005'}
+                    </Text>
+                  )}
                 </View>
 
                 {/* Checkout CTA */}
@@ -568,5 +613,52 @@ const styles = StyleSheet.create({
     color: '#444444',
     fontWeight: '600',
     lineHeight: 16,
+  },
+  shippingHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  shippingHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  changeAddressLinkText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#FF5A00',
+    textDecorationLine: 'underline',
+  },
+  addressEditActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  addressActionBtn: {
+    paddingVertical: 2,
+  },
+  addressActionSaveText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#2E7D32',
+  },
+  addressActionCancelText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#E01E35',
+  },
+  inlineAddressInput: {
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    fontSize: 12,
+    color: '#111111',
+    fontWeight: '500',
+    marginTop: 4,
+    minHeight: 40,
+    textAlignVertical: 'top',
   },
 });
