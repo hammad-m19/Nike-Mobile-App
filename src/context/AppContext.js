@@ -14,6 +14,9 @@ export const AppProvider = ({ children }) => {
   // Shopping Cart State (Array of { product, size, color, quantity })
   const [cart, setCart] = useState([]);
 
+  // Order History State (Array of { id, date, items, total, status })
+  const [orders, setOrders] = useState([]);
+
   // Custom Navigation State
   const [currentScreen, setCurrentScreen] = useState('Login'); // 'Login', 'SignUp', 'Main', 'ProductDetails', 'Collection'
   const [activeTab, setActiveTab] = useState('Home'); // 'Home', 'Search', 'Favorites', 'Profile'
@@ -102,6 +105,7 @@ export const AppProvider = ({ children }) => {
     setNavigationStack([]);
     setCart([]);
     setFavorites([]);
+    setOrders([]);
     setCurrentScreen('Main');
     setActiveTab('Home');
     setSelectedProductId(null);
@@ -139,6 +143,7 @@ export const AppProvider = ({ children }) => {
     setNavigationStack([]);
     setCart([]);
     setFavorites([]);
+    setOrders([]);
     setCurrentScreen('Main');
     setActiveTab('Home');
     setSelectedProductId(null);
@@ -150,6 +155,7 @@ export const AppProvider = ({ children }) => {
     setUser(null);
     setFavorites([]);
     setCart([]);
+    setOrders([]);
     setNavigationStack([]);
     setCurrentScreen('Login');
     setActiveTab('Home');
@@ -189,7 +195,6 @@ export const AppProvider = ({ children }) => {
   // Shopping Cart Logic
   const addToCart = (product, size, color) => {
     setCart((prevCart) => {
-      // Check if item already exists in cart with same size and color
       const existingItemIndex = prevCart.findIndex(
         (item) =>
           item.product.id === product.id &&
@@ -215,12 +220,29 @@ export const AppProvider = ({ children }) => {
     setCart([]);
   };
 
+  // Order Placement Logic
+  const placeOrder = (items, total) => {
+    const newOrder = {
+      id: `NK${Math.floor(100000 + Math.random() * 900000)}`,
+      date: new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }),
+      items: [...items],
+      total: total,
+      status: 'Preparing for dispatch'
+    };
+    setOrders((prevOrders) => [newOrder, ...prevOrders]);
+  };
+
   return (
     <AppContext.Provider
       value={{
         user,
         favorites,
         cart,
+        orders,
         currentScreen,
         activeTab,
         selectedProductId,
@@ -236,7 +258,8 @@ export const AppProvider = ({ children }) => {
         toggleFavorite,
         addToCart,
         removeFromCart,
-        clearCart
+        clearCart,
+        placeOrder
       }}
     >
       {children}

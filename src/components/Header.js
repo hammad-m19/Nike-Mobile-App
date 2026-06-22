@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 
 export default function Header({ title, showBack = false }) {
-  const { goBack, cart, removeFromCart, clearCart } = useApp();
+  const { goBack, cart, removeFromCart, clearCart, placeOrder } = useApp();
   const [isCartVisible, setIsCartVisible] = useState(false);
   const [isNotificationsVisible, setIsNotificationsVisible] = useState(false);
 
@@ -52,6 +52,7 @@ export default function Header({ title, showBack = false }) {
         {
           text: 'Awesome',
           onPress: () => {
+            placeOrder(cart, cartSubtotal);
             clearCart();
             setIsCartVisible(false);
           }
