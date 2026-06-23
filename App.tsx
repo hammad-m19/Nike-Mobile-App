@@ -19,7 +19,6 @@ import BottomTabBar from './src/components/BottomTabBar';
 function AppContent() {
   const { currentScreen, activeTab } = useApp();
 
-  // 1. Authentication Screens
   if (currentScreen === 'Login') {
     return <LoginScreen />;
   }
@@ -32,17 +31,15 @@ function AppContent() {
     return <ForgotPasswordScreen />;
   }
 
-  // 2. Product Details Screen (full height overlay)
+
   if (currentScreen === 'ProductDetails') {
     return <ProductDetailsScreen />;
   }
 
-  // 3. Collection Screen (full height overlay)
   if (currentScreen === 'Collection') {
     return <CollectionScreen />;
   }
 
-  // 3. Main Application with Tab Bar
   const renderTabContent = () => {
     switch (activeTab) {
       case 'Home':
