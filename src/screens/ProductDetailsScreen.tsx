@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
+import { Product, ProductColor } from '../data/products';
 
 export default function ProductDetailsScreen() {
   const { selectedProductId, products, favorites, toggleFavorite, goBack, addToCart } = useApp();
@@ -20,10 +21,10 @@ export default function ProductDetailsScreen() {
   const product = products.find((p) => p.id === selectedProductId);
 
   // Default selections
-  const [selectedColor, setSelectedColor] = useState(
+  const [selectedColor, setSelectedColor] = useState<ProductColor | null>(
     product && product.colors ? product.colors[0] : null
   );
-  const [selectedSize, setSelectedSize] = useState(
+  const [selectedSize, setSelectedSize] = useState<string | null>(
     product && product.sizes ? product.sizes[0] : null
   );
   const [isDescExpanded, setIsDescExpanded] = useState(true);
@@ -42,8 +43,8 @@ export default function ProductDetailsScreen() {
   const isFavorite = favorites.includes(product.id);
 
   const handleAddToCart = () => {
-    if (!selectedSize) {
-      Alert.alert('Selection Required', 'Please select a size before adding to bag.');
+    if (!selectedSize || !selectedColor) {
+      Alert.alert('Selection Required', 'Please select size and color before adding to bag.');
       return;
     }
     
@@ -79,7 +80,7 @@ export default function ProductDetailsScreen() {
       <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Large Hero Image */}
         <View style={styles.imageContainer}>
-          <Image source={{ uri: product.image }} style={styles.image} resizeMode="cover" />
+          <Image source={{ uri: product.image }} style={styles.image as any} resizeMode="cover" />
         </View>
 
         {/* Info Area */}
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 16,
-    fontWeight: '750',
+    fontWeight: '700',
     color: '#111111',
   },
   headerButton: {
@@ -256,7 +257,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: '850',
+    fontWeight: '800',
     color: '#111111',
     flex: 1,
     paddingRight: 10,
@@ -408,7 +409,7 @@ const styles = StyleSheet.create({
   cartBarButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '750',
+    fontWeight: '700',
   },
   errorContainer: {
     flex: 1,

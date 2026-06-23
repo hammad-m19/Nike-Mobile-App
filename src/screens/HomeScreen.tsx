@@ -10,7 +10,7 @@ import {
   Dimensions
 } from 'react-native';
 import { useApp } from '../context/AppContext';
-import { CATEGORIES, CAMPAIGNS } from '../data/products';
+import { CATEGORIES, CAMPAIGNS, Campaign } from '../data/products';
 import ProductCard from '../components/ProductCard';
 
 const { width } = Dimensions.get('window');
@@ -32,9 +32,9 @@ export default function HomeScreen() {
   const featuredProducts = filteredProducts.filter((p) => p.isFeatured);
 
   // Render a promotional campaign card
-  const renderCampaignItem = ({ item }) => (
+  const renderCampaignItem = ({ item }: { item: Campaign }) => (
     <View style={styles.campaignCard}>
-      <Image source={{ uri: item.image }} style={styles.campaignImage} />
+      <Image source={{ uri: item.image }} style={styles.campaignImage as any} />
       <View style={styles.campaignOverlay} />
       <View style={styles.campaignContent}>
         <Text style={styles.campaignSubtitle}>{item.subtitle}</Text>
@@ -187,7 +187,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   campaignOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.35)',
   },
   campaignContent: {
@@ -205,7 +209,7 @@ const styles = StyleSheet.create({
   },
   campaignTitle: {
     fontSize: 22,
-    fontWeight: '850',
+    fontWeight: '800',
     color: '#FFFFFF',
     marginVertical: 6,
     letterSpacing: -0.5,
@@ -233,7 +237,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '750',
+    fontWeight: '700',
     color: '#111111',
   },
   categoriesContainer: {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, ComponentProps } from 'react';
 import {
   View,
   Text,
@@ -22,13 +22,13 @@ export default function ProfileScreen() {
   
   // Single Modal Manager State
   // Values: null, 'edit', 'orders', 'inbox', 'pass', 'settings'
-  const [activeModal, setActiveModal] = useState(null);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   // Edit Profile form states
   const [editName, setEditName] = useState(user ? user.name : '');
   const [editEmail, setEditEmail] = useState(user ? user.email : '');
   const [editAddress, setEditAddress] = useState(user ? user.address : '');
-  const [editAvatar, setEditAvatar] = useState(user ? user.avatar : null);
+  const [editAvatar, setEditAvatar] = useState<string | null>(user ? user.avatar : null);
 
   // Password edit form states
   const [showPasswordFields, setShowPasswordFields] = useState(false);
@@ -107,7 +107,7 @@ export default function ProfileScreen() {
         Alert.alert('Error', 'Please fill in all password fields');
         return;
       }
-      if (currentPasswordInput !== user.password) {
+      if (user && currentPasswordInput !== user.password) {
         Alert.alert('Error', 'Current password is incorrect');
         return;
       }
@@ -148,7 +148,9 @@ export default function ProfileScreen() {
     Alert.alert('Success', 'Account settings saved successfully!');
   };
 
-  const menuItems = [
+  type IoniconName = ComponentProps<typeof Ionicons>['name'];
+
+  const menuItems: { icon: IoniconName; label: string; detail: string; type: string }[] = [
     { icon: 'receipt-outline', label: 'My Orders', detail: 'View history & track orders', type: 'orders' },
     { icon: 'mail-outline', label: 'Inbox', detail: 'Promotions, news, and receipts', type: 'inbox' },
     { icon: 'barcode-outline', label: 'Nike Pass', detail: 'Member card QR & benefits', type: 'pass' },
@@ -1156,7 +1158,7 @@ const styles = StyleSheet.create({
   },
   passMemberLabel: {
     fontSize: 11,
-    fontWeight: '750',
+    fontWeight: '700',
     color: '#FF5A00',
     letterSpacing: 1,
   },
@@ -1267,7 +1269,7 @@ const styles = StyleSheet.create({
   walletText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '750',
+    fontWeight: '700',
   },
   // Account Settings Styles
   settingsSectionTitle: {
@@ -1328,6 +1330,9 @@ const styles = StyleSheet.create({
   settingsSaveBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '750',
+    fontWeight: '700',
+  },
+  inputGroup: {
+    marginBottom: 16,
   },
 });

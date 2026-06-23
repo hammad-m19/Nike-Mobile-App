@@ -1,12 +1,21 @@
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 
+type IoniconName = ComponentProps<typeof Ionicons>['name'];
+
+interface TabItem {
+  name: string;
+  activeIcon: IoniconName;
+  inactiveIcon: IoniconName;
+  label: string;
+}
+
 export default function BottomTabBar() {
   const { activeTab, navigate } = useApp();
 
-  const tabs = [
+  const tabs: TabItem[] = [
     { name: 'Home', activeIcon: 'home', inactiveIcon: 'home-outline', label: 'Shop' },
     { name: 'Search', activeIcon: 'search', inactiveIcon: 'search-outline', label: 'Search' },
     { name: 'Favorites', activeIcon: 'heart', inactiveIcon: 'heart-outline', label: 'Favorites' },

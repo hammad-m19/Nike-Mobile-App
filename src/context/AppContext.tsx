@@ -1,35 +1,107 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { Alert } from 'react-native';
-import { PRODUCTS } from '../data/products';
+import { PRODUCTS, Product, ProductColor } from '../data/products';
 
-const AppContext = createContext();
+export interface User {
+  name: string;
+  email: string;
+  avatar: string | null;
+  address: string;
+  password?: string;
+}
 
-export const AppProvider = ({ children }) => {
+export interface CartItem {
+  product: Product;
+  size: string;
+  color: ProductColor;
+  quantity: number;
+}
+
+export interface Order {
+  id: string;
+  date: string;
+  items: CartItem[];
+  total: number;
+  status: string;
+}
+
+export interface NavigationState {
+  screen: string;
+  tab: string;
+  productId: string | null;
+  collectionId: string | null;
+  collectionTitle: string;
+}
+
+export interface AppContextType {
+  user: User | null;
+  favorites: string[];
+  cart: CartItem[];
+  orders: Order[];
+  currentScreen: string;
+  activeTab: string;
+  selectedProductId: string | null;
+  selectedCollectionId: string | null;
+  selectedCollectionTitle: string;
+  products: Product[];
+  navigate: (
+    screen: string,
+    tab?: string | null,
+    productId?: string | null,
+    collectionData?: { id: string; title: string } | null
+  ) => void;
+  goBack: () => void;
+  login: (email: string, password: string) => boolean;
+  register: (name: string, email: string, password: string, confirmPassword: string) => boolean;
+  logout: () => void;
+  updateProfile: (
+    name: string,
+    email: string,
+    address: string,
+    avatar?: string | null,
+    newPassword?: string | null
+  ) => boolean;
+  updateAddress: (address: string) => boolean;
+  toggleFavorite: (productId: string) => void;
+  addToCart: (product: Product, size: string, color: ProductColor) => void;
+  removeFromCart: (index: number) => void;
+  clearCart: () => void;
+  placeOrder: (items: CartItem[], total: number) => void;
+}
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
+
+export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Authentication State
-  const [user, setUser] = useState(null); // { name, email, avatar, address, password } when logged in
+  const [user, setUser] = useState<User | null>(null); // { name, email, avatar, address, password } when logged in
 
   // Wishlist State (Array of product IDs)
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
 
   // Shopping Cart State (Array of { product, size, color, quantity })
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
 
   // Order History State (Array of { id, date, items, total, status })
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<Order[]>([]);
 
   // Custom Navigation State
-  const [currentScreen, setCurrentScreen] = useState('Login'); // 'Login', 'SignUp', 'Main', 'ProductDetails', 'Collection'
-  const [activeTab, setActiveTab] = useState('Home'); // 'Home', 'Search', 'Favorites', 'Profile'
-  const [selectedProductId, setSelectedProductId] = useState(null);
-  const [selectedCollectionId, setSelectedCollectionId] = useState(null); // 'jordan', 'running', etc.
-  const [selectedCollectionTitle, setSelectedCollectionTitle] = useState('');
-  const [navigationStack, setNavigationStack] = useState([]);
+  const [currentScreen, setCurrentScreen] = useState<string>('Login'); // 'Login', 'SignUp', 'Main', 'ProductDetails', 'Collection'
+  const [activeTab, setActiveTab] = useState<string>('Home'); // 'Home', 'Search', 'Favorites', 'Profile'
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null); // 'jordan', 'running', etc.
+  const [selectedCollectionTitle, setSelectedCollectionTitle] = useState<string>('');
+  const [navigationStack, setNavigationStack] = useState<NavigationState[]>([]);
 
   // Dynamic products list
-  const [products] = useState(PRODUCTS);
+  const [products] = useState<Product[]>(PRODUCTS);
 
   // Navigation Logic
-  const navigate = (screen, tab = null, productId = null, collectionData = null) => {
+  const navigate = (
+    screen: string,
+    tab: string | null = null,
+    productId: string | null = null,
+    collectionData: { id: string; title: string } | null = null
+  ) => {
     // Record current state in stack for back navigation
     setNavigationStack((prevStack) => [
       ...prevStack,
@@ -38,14 +110,14 @@ export const AppProvider = ({ children }) => {
         tab: activeTab,
         productId: selectedProductId,
         collectionId: selectedCollectionId,
-        collectionTitle: selectedCollectionTitle
-      }
+        collectionTitle: selectedCollectionTitle,
+      },
     ]);
 
     setCurrentScreen(screen);
     if (tab) setActiveTab(tab);
-    if (productId !== undefined) setSelectedProductId(productId);
-    
+    if (productId !== null) setSelectedProductId(productId);
+
     if (collectionData) {
       setSelectedCollectionId(collectionData.id);
       setSelectedCollectionTitle(collectionData.title);
@@ -65,19 +137,21 @@ export const AppProvider = ({ children }) => {
     setNavigationStack((prevStack) => {
       const newStack = [...prevStack];
       const previousState = newStack.pop();
-      
-      setCurrentScreen(previousState.screen);
-      setActiveTab(previousState.tab);
-      setSelectedProductId(previousState.productId);
-      setSelectedCollectionId(previousState.collectionId);
-      setSelectedCollectionTitle(previousState.collectionTitle);
-      
+
+      if (previousState) {
+        setCurrentScreen(previousState.screen);
+        setActiveTab(previousState.tab);
+        setSelectedProductId(previousState.productId);
+        setSelectedCollectionId(previousState.collectionId);
+        setSelectedCollectionTitle(previousState.collectionTitle);
+      }
+
       return newStack;
     });
   };
 
   // Auth Functions
-  const login = (email, password) => {
+  const login = (email: string, password: string) => {
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return false;
@@ -95,15 +169,15 @@ export const AppProvider = ({ children }) => {
 
     const userName = email.split('@')[0];
     const capitalizedName = userName.charAt(0).toUpperCase() + userName.slice(1);
-    
+
     setUser({
       name: capitalizedName,
       email: email,
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
       address: '123 Nike Way, Beaverton, OR 97005', // Default Nike HQ address
-      password: password
+      password: password,
     });
-    
+
     setNavigationStack([]);
     setCart([]);
     setFavorites([]);
@@ -115,7 +189,7 @@ export const AppProvider = ({ children }) => {
     return true;
   };
 
-  const register = (name, email, password, confirmPassword) => {
+  const register = (name: string, email: string, password: string, confirmPassword: string) => {
     if (!name || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return false;
@@ -141,7 +215,7 @@ export const AppProvider = ({ children }) => {
       email: email,
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
       address: '123 Nike Way, Beaverton, OR 97005',
-      password: password
+      password: password,
     });
 
     setNavigationStack([]);
@@ -167,7 +241,13 @@ export const AppProvider = ({ children }) => {
     setSelectedCollectionId(null);
   };
 
-  const updateProfile = (name, email, address, avatar = undefined, newPassword = null) => {
+  const updateProfile = (
+    name: string,
+    email: string,
+    address: string,
+    avatar: string | null = undefined as any,
+    newPassword: string | null = null
+  ) => {
     if (!name || !email) {
       Alert.alert('Error', 'Name and email cannot be empty');
       return false;
@@ -176,31 +256,34 @@ export const AppProvider = ({ children }) => {
       Alert.alert('Error', 'Please enter a valid email address');
       return false;
     }
-    
-    setUser((prev) => ({
-      ...prev,
-      name,
-      email,
-      address,
-      avatar: avatar !== undefined ? avatar : prev.avatar,
-      ...(newPassword ? { password: newPassword } : {})
-    }));
-    return true;
-  };
 
-  const updateAddress = (address) => {
     setUser((prev) => {
       if (!prev) return null;
       return {
         ...prev,
-        address
+        name,
+        email,
+        address,
+        avatar: avatar !== undefined ? avatar : prev.avatar,
+        ...(newPassword ? { password: newPassword } : {}),
+      };
+    });
+    return true;
+  };
+
+  const updateAddress = (address: string) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        address,
       };
     });
     return true;
   };
 
   // Favorites (Wishlist) Logic
-  const toggleFavorite = (productId) => {
+  const toggleFavorite = (productId: string) => {
     setFavorites((prev) => {
       if (prev.includes(productId)) {
         return prev.filter((id) => id !== productId);
@@ -211,7 +294,7 @@ export const AppProvider = ({ children }) => {
   };
 
   // Shopping Cart Logic
-  const addToCart = (product, size, color) => {
+  const addToCart = (product: Product, size: string, color: ProductColor) => {
     setCart((prevCart) => {
       const existingItemIndex = prevCart.findIndex(
         (item) =>
@@ -230,7 +313,7 @@ export const AppProvider = ({ children }) => {
     });
   };
 
-  const removeFromCart = (index) => {
+  const removeFromCart = (index: number) => {
     setCart((prevCart) => prevCart.filter((_, i) => i !== index));
   };
 
@@ -239,17 +322,17 @@ export const AppProvider = ({ children }) => {
   };
 
   // Order Placement Logic
-  const placeOrder = (items, total) => {
+  const placeOrder = (items: CartItem[], total: number) => {
     const newOrder = {
       id: `NK${Math.floor(100000 + Math.random() * 900000)}`,
       date: new Date().toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
-        year: 'numeric'
+        year: 'numeric',
       }),
       items: [...items],
       total: total,
-      status: 'Preparing for dispatch'
+      status: 'Preparing for dispatch',
     };
     setOrders((prevOrders) => [newOrder, ...prevOrders]);
   };
@@ -278,7 +361,7 @@ export const AppProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         clearCart,
-        placeOrder
+        placeOrder,
       }}
     >
       {children}
@@ -286,4 +369,10 @@ export const AppProvider = ({ children }) => {
   );
 };
 
-export const useApp = () => useContext(AppContext);
+export const useApp = () => {
+  const context = useContext(AppContext);
+  if (context === undefined) {
+    throw new Error('useApp must be used within an AppProvider');
+  }
+  return context;
+};

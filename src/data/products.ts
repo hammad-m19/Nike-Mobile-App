@@ -1,4 +1,33 @@
-export const PRODUCTS = [
+export interface ProductColor {
+  name: string;
+  code: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  category: string;
+  subCategory: string;
+  price: number;
+  description: string;
+  colors: ProductColor[];
+  sizes: string[];
+  image: string;
+  isFeatured: boolean;
+  isTrending: boolean;
+  rating: number;
+  reviews: number;
+}
+
+export interface Campaign {
+  id: string;
+  title: string;
+  subtitle: string;
+  buttonText: string;
+  image: string;
+}
+
+export const PRODUCTS: Product[] = [
   {
     id: '1',
     name: 'Nike Air Force 1 \'07',
@@ -153,9 +182,9 @@ export const PRODUCTS = [
   }
 ];
 
-export const CATEGORIES = ['All', 'Shoes', 'Apparel', 'Accessories'];
+export const CATEGORIES: string[] = ['All', 'Shoes', 'Apparel', 'Accessories'];
 
-export const CAMPAIGNS = [
+export const CAMPAIGNS: Campaign[] = [
   {
     id: 'c1',
     title: 'RETRO NEVER DIES',

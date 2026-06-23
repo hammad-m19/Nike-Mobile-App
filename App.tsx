@@ -3,7 +3,6 @@ import { StyleSheet, View, SafeAreaView, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { AppProvider, useApp } from './src/context/AppContext';
 
-// Import Screens
 import LoginScreen from './src/screens/LoginScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -14,7 +13,6 @@ import ProductDetailsScreen from './src/screens/ProductDetailsScreen';
 import CollectionScreen from './src/screens/CollectionScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 
-// Import Reusable Components
 import Header from './src/components/Header';
 import BottomTabBar from './src/components/BottomTabBar';
 
@@ -99,7 +97,7 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    paddingTop: Platform.OS === 'android' ? 30 : 0, // spacing for android status bar if not handled
+    paddingTop: Platform.OS === 'android' ? 30 : 0,
   },
   tabContentContainer: {
     flex: 1,

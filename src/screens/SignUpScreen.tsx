@@ -21,12 +21,12 @@ export default function SignUpScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   // Form error states
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleRegister = () => {
     // Reset errors
     setErrors({});
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
 
     if (!name.trim()) {
       newErrors.name = 'Full Name is required';

@@ -43,7 +43,7 @@ export default function SearchScreen() {
   const filteredProducts = getFilteredProducts();
   const hasQuery = searchQuery.trim().length > 0;
 
-  const handleTagPress = (tag) => {
+  const handleTagPress = (tag: string) => {
     setSearchQuery(tag);
     Keyboard.dismiss();
   };
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: '750',
+    fontWeight: '700',
     color: '#111111',
     marginTop: 16,
     marginBottom: 8,
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '750',
+    fontWeight: '700',
     color: '#111111',
     marginBottom: 16,
   },

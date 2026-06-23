@@ -15,7 +15,20 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 
-export default function Header({ title, showBack = false }) {
+interface HeaderProps {
+  title?: string;
+  showBack?: boolean;
+}
+
+interface NotificationItem {
+  id: string;
+  title: string;
+  desc: string;
+  time: string;
+  unread: boolean;
+}
+
+export default function Header({ title, showBack = false }: HeaderProps) {
   const { goBack, cart, removeFromCart, clearCart, placeOrder, user, updateAddress } = useApp();
   const [isCartVisible, setIsCartVisible] = useState(false);
   const [isNotificationsVisible, setIsNotificationsVisible] = useState(false);
@@ -34,7 +47,7 @@ export default function Header({ title, showBack = false }) {
   };
 
   // Notifications Mock Data
-  const [notifications, setNotifications] = useState([
+  const [notifications, setNotifications] = useState<NotificationItem[]>([
     {
       id: 'n1',
       title: 'EXCLUSIVE MEMBER REWARD',
@@ -497,7 +510,7 @@ const styles = StyleSheet.create({
   checkoutButtonText: {
     color: '#FFFFFF',
     fontSize: 15,
-    fontWeight: '750',
+    fontWeight: '700',
   },
   // Empty Modal State
   emptyModalContainer: {
@@ -603,7 +616,7 @@ const styles = StyleSheet.create({
   },
   shippingTitle: {
     fontSize: 10,
-    fontWeight: '850',
+    fontWeight: '800',
     color: '#111111',
     letterSpacing: 0.5,
     marginLeft: 6,
